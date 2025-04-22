@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_04_21_225544) do
+ActiveRecord::Schema[8.0].define(version: 2025_04_22_004214) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -128,6 +128,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_21_225544) do
     t.decimal "pst"
     t.decimal "hst"
     t.string "status", default: "pending"
+    t.text "customer_notes"
     t.index ["user_id"], name: "index_orders_on_user_id"
   end
 

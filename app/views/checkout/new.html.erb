@@ -6,7 +6,7 @@
   <div class="row">
     <!-- Checkout Form -->
     <div class="col-lg-8 mb-4">
-      <%= form_with model: @order, url: checkout_index_path, method: :post, data: { turbo: false }, html: { class: "needs-validation" } do |f| %>
+      <%= form_with model: @order, url: checkout_path, method: :post, data: { turbo: false }, html: { class: "needs-validation" } do |f| %>
 
         <!-- Shipping Info -->
         <div class="card shadow-sm mb-4">
@@ -69,7 +69,7 @@
           <h4 class="mb-0">Order Summary</h4>
         </div>
         <div class="card-body">
-          <% @books.each do |book| %>
+          <% @books.each do |book_id, book| %>
             <div class="border-bottom pb-2 mb-2">
               <h5 class="mb-1"><%= book.title %></h5>
               <small class="text-muted">Qty: <%= @cart_items[book.id] %></small><br>

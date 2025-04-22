@@ -31,15 +31,11 @@ Rails.application.routes.draw do
     delete 'remove/:id', to: 'cart#remove', as: :remove_from_cart
   end
 
-  # Checkout flow - updated to be more RESTful
-  resources :checkout, only: [:new, :create], path: '' do
-    collection do
-      get 'checkout/new', action: :new, as: :new_checkout
-      post 'checkout', action: :create, as: :checkout
-      get 'checkout/confirm/:id', action: :confirm, as: :checkout_confirm
-      get 'checkout/tax_rates', action: :tax_rates  # Add this route to fetch tax rates
-    end
-  end
+  # Checkout flow
+  get 'checkout/new', to: 'checkout#new', as: :new_checkout
+  post 'checkout', to: 'checkout#create', as: :checkout
+  get 'checkout/confirm/:id', to: 'checkout#confirm', as: :checkout_confirm
+  get 'checkout/tax_rates', to: 'checkout#tax_rates'
 
   # Admin namespace
   namespace :admin do

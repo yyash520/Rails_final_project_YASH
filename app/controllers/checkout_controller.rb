@@ -1,154 +1,123 @@
 class CheckoutController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_cart_items, only: [:new, :create]
-  before_action :initialize_cart_variables, only: [:new, :create]
-  before_action :load_cart_items, only: [:new, :create]
+  before_action :load_cart_data, only: [:new, :create]
+  before_action :verify_cart_not_empty, only: [:new, :create]
+  before_action :load_books_with_lock, only: [:create] # Changed to only create for performance
   before_action :initialize_order, only: [:new]
 
   def new
-    if @cart_items.empty?
-      redirect_to cart_path, alert: "Your cart is empty. Please add items before checking out."
-      return
-    end
-
-    @order ||= Order.new(
-      customer: current_user,
-      shipping_address: current_user.address,
-      billing_address: current_user.address,
-      province: current_user.province
-    )
-
+    load_books # Regular load for display purposes
     calculate_order_totals
   end
 
   def create
-    @cart_items = session[:cart] || {}
-    if @cart_items.empty?
-      redirect_to cart_path, alert: "Your cart is empty."
-      return
-    end
+    ActiveRecord::Base.transaction do
+      @order = build_order_with_items
 
-    @order = Order.new(order_params)
-    @order.customer = current_user
-    books = Book.where(id: @cart_items.keys)
-    @order.calculate_totals(@cart_items, books)
+      # Validate stock before saving
+      validate_stock_availability
 
-    if @order.save
-      begin
-        process_order_items(@order, @cart_items)
-        clear_cart # Clear the cart once order is placed successfully
+      if @order.save
+        update_book_stocks
+        clear_cart
         redirect_to order_path(@order), notice: "Order placed successfully!"
-      rescue ActiveRecord::RecordInvalid => e
-        @order.destroy # If error occurs, delete the order
-        flash.now[:alert] = "Order failed: #{e.message}"
-        render :new # Render the form again with error message
-      end
-    else
-      flash.now[:alert] = "Order validation failed."
-      render :new # Show errors and allow user to correct them
-    end
-  end
-
-  def confirm
-    @order = current_user.orders.includes(:order_items, :books).find(params[:id])
-  rescue ActiveRecord::RecordNotFound
-    redirect_to root_path, alert: "Order not found."
-  end
-
-  def tax_rates
-    province_code = params[:province]
-    taxes = Order::PROVINCE_TAXES[province_code] || {}
-
-    respond_to do |format|
-      if taxes.present?
-        format.json { render json: taxes }
+        return
       else
-        format.json { render json: { error: "Invalid province code" }, status: :unprocessable_entity }
+        raise ActiveRecord::Rollback, @order.errors.full_messages.to_sentence
       end
     end
+
+    # Only reached if transaction fails
+    load_books # Reload for the form
+    flash.now[:alert] = @order.errors.full_messages.to_sentence.presence || "Order could not be placed"
+    render :new
+  rescue ActiveRecord::RecordInvalid => e
+    Rails.logger.error "Order validation failed: #{e.message}"
+    flash.now[:alert] = e.record.errors.full_messages.to_sentence
+    render :new
+  rescue => e
+    Rails.logger.error "Checkout Error: #{e.message}\n#{e.backtrace.join("\n")}"
+    flash.now[:alert] = e.message
+    render :new
   end
 
   private
 
-  def order_params
-    params.require(:order).permit(
-      :shipping_address,
-      :billing_address,
-      :province,
-      :customer_notes,
-      :subtotal,
-      :gst,
-      :pst,
-      :hst,
-      :total_price
-    )
+  def load_cart_data
+    @cart_items = (session[:cart] || {}).transform_values(&:to_i)
   end
 
-  def set_cart_items
-    cart_data = session[:cart] || {}
-    @cart_items = cart_data.map do |book_id, quantity|
-      { book_id: book_id.to_i, quantity: quantity.to_i }
-    end
+  def verify_cart_not_empty
+    return unless @cart_items.empty?
+    redirect_to cart_path, alert: "Your cart is empty."
   end
 
-  def initialize_cart_variables
-    @valid_cart_items = @cart_items.each_with_object([]) do |item, arr|
-      book = Book.find_by(id: item[:book_id])
-      next unless book
-
-      arr << {
-        book: book,
-        quantity: item[:quantity],
-        price: book.price,
-        total: book.price * item[:quantity]
-      }
-    end
-
-    @subtotal = @valid_cart_items.sum { |item| item[:total] }
+  def load_books
+    @books = Book.where(id: @cart_items.keys).index_by(&:id)
   end
 
-  def load_cart_items
-    @cart_items = (session[:cart] || {}).transform_keys(&:to_i)
-    @books = Book.where(id: @cart_items.keys)
+  def load_books_with_lock
+    @books = Book.lock.where(id: @cart_items.keys).index_by(&:id)
   end
 
   def initialize_order
     @order ||= current_user.orders.new(
       shipping_address: current_user.address,
       billing_address: current_user.address,
-      province: current_user.province
+      province: current_user.province,
+      status: :pending
     )
-    calculate_order_totals
   end
 
   def calculate_order_totals
-    return unless @cart_items.present? && @books.present?
-
-    @order.calculate_totals(@cart_items, @books)
-    @order.subtotal ||= @subtotal
-    @order.total_price ||= @order.subtotal + @order.gst.to_f + @order.pst.to_f + @order.hst.to_f
+    @order.calculate_totals(@cart_items, @books.values)
   end
 
-  def process_order_items(order, cart_items)
-    ActiveRecord::Base.transaction do
-      cart_items.each do |book_id, quantity|
-        book = Book.find(book_id)
-        new_stock = book.stock - quantity.to_i
-        raise ActiveRecord::RecordInvalid.new(book), "Not enough stock" if new_stock < 0
+  def build_order_with_items
+    order = current_user.orders.new(order_params)
+    order.status = :pending
 
-        order.order_items.create!(
-          book: book,
-          quantity: quantity,
-          price: book.price
-        )
+    @cart_items.each do |book_id, quantity|
+      book = @books[book_id.to_i]
+      next unless book
 
-        book.update!(stock: new_stock)
+      order.order_items.build(
+        book: book,
+        quantity: quantity,
+        price: book.price
+      )
+    end
+
+    order.calculate_totals(@cart_items, @books.values)
+    order
+  end
+
+  def validate_stock_availability
+    @cart_items.each do |book_id, quantity|
+      book = @books[book_id.to_i]
+      if book.stock < quantity
+        raise "Not enough stock for #{book.title}. Available: #{book.stock}, Requested: #{quantity}"
       end
+    end
+  end
+
+  def update_book_stocks
+    @order.order_items.each do |item|
+      item.book.decrement!(:stock, item.quantity)
     end
   end
 
   def clear_cart
     session.delete(:cart)
-    @cart_items = {}
+    current_user.cart.line_items.destroy_all if current_user.cart.present?
+  end
+
+  def order_params
+    params.require(:order).permit(
+      :shipping_address,
+      :billing_address,
+      :province,
+      :customer_notes
+    )
   end
 end

@@ -3,8 +3,8 @@ ActiveAdmin.register Order do
                 :status, :customer_notes, :subtotal, :total_price,
                 :gst, :pst, :hst, order_items_attributes: [:id, :book_id, :quantity, :price, :_destroy]
 
-  # Filters configuration
-  filter :customer_id, as: :select,
+  # Filters configuration - fixed user filter
+  filter :user_id, as: :select,
          collection: -> { User.all.map { |u| [u.email, u.id] } },
          label: "Customer"
   filter :status, as: :select, collection: Order.statuses.keys
@@ -60,7 +60,7 @@ ActiveAdmin.register Order do
   # Form configuration
   form do |f|
     f.inputs "Order Details" do
-      f.input :customer, as: :select,
+      f.input :user, as: :select,
               collection: User.all.map { |u| [u.email, u.id] },
               label: "Customer"
       f.input :status, as: :select, collection: Order.statuses.keys
