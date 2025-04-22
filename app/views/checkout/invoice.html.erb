@@ -1,0 +1,79 @@
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-8 offset-md-2">
+      <div class="card">
+        <div class="card-header">
+          <h2>Invoice #<%= @order.id %></h2>
+          <p class="text-muted">Date: <%= @order.created_at.strftime("%B %d, %Y") %></p>
+        </div>
+
+        <div class="card-body">
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <h4>Shipping Address</h4>
+              <p>
+                <%= current_user.name %><br>
+                <%= @order.shipping_address %><br>
+                <%= @order.province %>
+              </p>
+            </div>
+          </div>
+
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @order.order_items.each do |item| %>
+                <tr>
+                  <td><%= item.book.title %></td>
+                  <td><%= item.quantity %></td>
+                  <td><%= number_to_currency(item.price) %></td>
+                  <td><%= number_to_currency(item.total) %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+
+          <div class="row mt-4">
+            <div class="col-md-6 offset-md-6">
+              <table class="table">
+                <tr>
+                  <th>Subtotal:</th>
+                  <td><%= number_to_currency(@order.subtotal) %></td>
+                </tr>
+                <% if @order.gst > 0 %>
+                  <tr>
+                    <th>GST (<%= number_to_percentage(@order.gst / @order.subtotal * 100, precision: 2) %>):</th>
+                    <td><%= number_to_currency(@order.gst) %></td>
+                  </tr>
+                <% end %>
+                <% if @order.pst > 0 %>
+                  <tr>
+                    <th>PST (<%= number_to_percentage(@order.pst / @order.subtotal * 100, precision: 2) %>):</th>
+                    <td><%= number_to_currency(@order.pst) %></td>
+                  </tr>
+                <% end %>
+                <% if @order.hst > 0 %>
+                  <tr>
+                    <th>HST (<%= number_to_percentage(@order.hst / @order.subtotal * 100, precision: 2) %>):</th>
+                    <td><%= number_to_currency(@order.hst) %></td>
+                  </tr>
+                <% end %>
+                <tr>
+                  <th>Total:</th>
+                  <td><strong><%= number_to_currency(@order.total) %></strong></td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,42 @@
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-lg-8 mx-auto">
+      <h1 class="display-4"><%= @page.title || "About Maple Reads" %></h1>
+
+      <div class="card mt-4">
+        <div class="card-body">
+          <% if @page&.content.present? %>
+            <%= raw @page.content %>
+          <% else %>
+            <!-- Fallback content (what you currently have) -->
+            <h3>Our Story</h3>
+            <p class="lead">
+              Maple Reads was founded in 2023 with a simple mission: to connect readers with their next favorite book.
+            </p>
+            <p>
+              We specialize in curating quality literature from Canadian authors and publishers, bringing you the best
+              stories from across the country.
+            </p>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Static section that won't be editable -->
+      <div class="card mt-4">
+        <div class="card-body">
+          <h3>Our Team</h3>
+          <div class="row">
+            <div class="col-md-6">
+              <h5>Yash</h5>
+              <p>Founder & Chief Bookworm</p>
+            </div>
+            <div class="col-md-6">
+              <h5>Our Community</h5>
+              <p>Dedicated readers like you who make this all worthwhile</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

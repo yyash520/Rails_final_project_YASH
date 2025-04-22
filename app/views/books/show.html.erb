@@ -1,0 +1,21 @@
+<h1><%= @book.title %></h1>
+
+<% if @book.author.present? %>
+  <p><strong>Author:</strong> <%= @book.author %></p>
+<% end %>
+
+<p><strong>Category:</strong> <%= @book.category.name if @book.category.present? %></p>
+<p><strong>Price:</strong> $<%= @book.price %></p>
+<p><strong>Stock Available:</strong> <%= @book.stock > 0 ? @book.stock : "Out of Stock" %></p>
+
+<br>
+
+<% if @book.stock > 0 %>
+  <%= button_to "Add to Cart", add_to_cart_book_path(@book), method: :post, class: "btn btn-primary" %>
+<% else %>
+  <button class="btn btn-secondary" disabled>Out of Stock</button>
+<% end %>
+
+<br><br>
+
+<%= link_to "Back to Books", books_path, class: "btn btn-light" %>

@@ -1,0 +1,23 @@
+default:
+  source_path: app/javascript
+  source_entry_path: packs
+  public_root_path: public
+  public_output_path: packs
+  cache_path: tmp/cache/webpacker
+  webpack_compile_output: true
+  extract_css: false
+
+development:
+  <<: *default
+  compile: true
+  dev_server:
+    https: false
+    host: localhost
+    port: 3035
+    public: localhost:3035
+
+production:
+  <<: *default
+  compile: false
+  extract_css: true
+  cache_manifest: true

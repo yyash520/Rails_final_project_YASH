@@ -1,0 +1,333 @@
+/*
+ * Enhanced with high-contrast pink theme
+ * Maintains all original functionality
+ */
+
+/* Import ActiveAdmin styles */
+@import "activeadmin";
+@import "bootstrap";
+
+/* Global Styles - Pink Theme */
+:root {
+  --primary-pink: #ff2d75;
+  --dark-pink: #d4004e;
+  --light-pink: #ff7fab;
+  --contrast-teal: #00c2ba;
+  --dark-bg: #1a1a1a;
+  --light-bg: #fff0f5;
+  --text-dark: #2a2a2a;
+  --text-light: #ffffff;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Arial', sans-serif;
+  line-height: 1.6;
+  background-color: var(--light-bg);
+  color: var(--text-dark);
+  padding-top: 70px;
+}
+
+/* Header Styles - High Contrast */
+header {
+  position: fixed;
+  width: 100%;
+  top: 0;
+  background-color: var(--dark-bg);
+  padding: 15px 0;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+nav {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 0 20px;
+}
+
+.header-link {
+  color: var(--text-light);
+  font-size: 18px;
+  text-decoration: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background-color: transparent;
+}
+
+.header-link:hover {
+  background-color: var(--primary-pink);
+  color: var(--text-light);
+  transform: translateY(-2px);
+}
+
+/* Page Layout */
+main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 15px rgba(255,45,117,0.1);
+  margin-bottom: 40px;
+}
+
+h1 {
+  font-size: 2.5em;
+  color: var(--primary-pink);
+  margin-bottom: 20px;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+h2 {
+  font-size: 1.8em;
+  color: var(--dark-pink);
+  border-bottom: 2px solid var(--light-pink);
+  padding-bottom: 8px;
+}
+
+/* Book List Styles - Enhanced */
+.book-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 25px;
+  margin-top: 30px;
+}
+
+.book-item {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(255,45,117,0.15);
+  padding: 25px;
+  text-align: center;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  border: 1px solid rgba(255,45,117,0.1);
+}
+
+.book-item:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 10px 20px rgba(255,45,117,0.2);
+  border-color: var(--light-pink);
+}
+
+.book-item img {
+  max-width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  border: 2px solid var(--light-pink);
+}
+
+.book-item button {
+  margin-top: 15px;
+  padding: 12px 25px;
+  font-size: 1em;
+  font-weight: bold;
+  background-color: var(--primary-pink);
+  border: none;
+  border-radius: 30px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  letter-spacing: 0.5px;
+}
+
+.book-item button:hover {
+  background-color: var(--dark-pink);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(212,0,78,0.3);
+}
+
+.book-item p {
+  color: #666;
+  margin: 10px 0;
+}
+
+/* Cart Page Styles - Vibrant */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 30px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 15px rgba(255,45,117,0.1);
+}
+
+th, td {
+  padding: 15px;
+  text-align: left;
+}
+
+th {
+  background-color: var(--primary-pink);
+  color: var(--text-light);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+td {
+  background-color: white;
+  border-bottom: 1px solid #ffe5ee;
+}
+
+tr:hover td {
+  background-color: #fff5f9;
+}
+
+button {
+  background-color: var(--primary-pink);
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  background-color: var(--dark-pink);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(212,0,78,0.3);
+}
+
+/* Pagination - Pink Style */
+.pagination {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.pagination a, .pagination span {
+  color: var(--primary-pink);
+  text-decoration: none;
+  padding: 10px 15px;
+  font-size: 1em;
+  border-radius: 30px;
+  margin: 0 5px;
+  transition: all 0.3s ease;
+  border: 1px solid var(--light-pink);
+}
+
+.pagination a:hover {
+  background-color: var(--primary-pink);
+  color: white;
+  border-color: var(--primary-pink);
+}
+
+.pagination .active {
+  background-color: var(--primary-pink);
+  color: white;
+  border-color: var(--primary-pink);
+}
+
+/* Footer - Dark Contrast */
+footer {
+  background-color: var(--dark-bg);
+  color: var(--text-light);
+  text-align: center;
+  padding: 30px 0;
+  margin-top: 40px;
+}
+
+footer a {
+  color: var(--light-pink);
+  text-decoration: none;
+  transition: color 0.3s ease;
+  font-weight: 600;
+}
+
+footer a:hover {
+  color: var(--text-light);
+  text-decoration: underline;
+}
+
+/* Additional Enhancements */
+
+/* Form Elements */
+input, select, textarea {
+  border: 2px solid #ffc0cb;
+  border-radius: 6px;
+  padding: 10px 15px;
+  transition: all 0.3s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--primary-pink);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255,45,117,0.2);
+}
+
+/* Alerts & Notices */
+.alert {
+  padding: 15px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+.alert-info {
+  background-color: #e5f9f8;
+  border-left: 4px solid var(--contrast-teal);
+  color: #007d79;
+}
+
+.alert-success {
+  background-color: #f0fff0;
+  border-left: 4px solid #4CAF50;
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: var(--primary-pink);
+  border-color: var(--primary-pink);
+}
+
+.btn-secondary {
+  background-color: var(--contrast-teal);
+  border-color: var(--contrast-teal);
+}
+
+/* Animations */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .book-list {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+
+  header {
+    padding: 10px 0;
+  }
+
+  .header-link {
+    font-size: 16px;
+    padding: 6px 10px;
+    margin: 5px;
+  }
+
+  nav {
+    flex-direction: column;
+    align-items: center;
+  }
+}

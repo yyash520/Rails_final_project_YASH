@@ -1,0 +1,102 @@
+<div class="container mt-4">
+  <div class="card">
+    <div class="card-header bg-success text-white">
+      <h1>Order Confirmation #<%= @order.id %></h1>
+    </div>
+    <div class="card-body">
+      <p class="alert alert-success">Thank you for your order! A confirmation has been sent to your email.</p>
+
+      <div class="row">
+      <div class="col-md-6">
+      <h3>Customer Information</h3>
+      <p><strong>Email:</strong> <%= @order.customer.email %></p>
+
+      <h4 class="mt-3">Shipping Address</h4>
+      <p><strong>Address:</strong> <%= @order.shipping_address %></p>
+
+      <h4>Billing Address</h4>
+      <p><strong>Address:</strong> <%= @order.billing_address %></p>
+
+      <p><strong>Province:</strong> <%= @order.province %></p>
+    </div>
+
+
+        <div class="col-md-6">
+          <h3>Order Details</h3>
+          <p><strong>Order Date:</strong> <%= @order.created_at.to_formatted_s(:long) %></p>
+          <p><strong>Status:</strong> <%= @order.status.capitalize %></p>
+        </div>
+      </div>
+
+      <hr>
+
+      <h3>Order Items</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @order.order_items.each do |item| %>
+            <tr>
+              <td><%= item.book.title %></td>
+              <td><%= item.quantity %></td>
+              <td><%= number_to_currency(item.price) %></td>
+              <td><%= number_to_currency(item.price * item.quantity) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+
+      <div class="row mt-4">
+        <div class="col-md-6 offset-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h4>Order Summary</h4>
+              <div class="row">
+                <div class="col-6">Subtotal:</div>
+                <div class="col-6 text-right"><%= number_to_currency(@order.subtotal) %></div>
+              </div>
+
+              <% if @order.gst > 0 %>
+                <div class="row">
+                  <div class="col-6">GST:</div>
+                  <div class="col-6 text-right"><%= number_to_currency(@order.gst) %></div>
+                </div>
+              <% end %>
+
+              <% if @order.pst > 0 %>
+                <div class="row">
+                  <div class="col-6">PST:</div>
+                  <div class="col-6 text-right"><%= number_to_currency(@order.pst) %></div>
+                </div>
+              <% end %>
+
+              <% if @order.hst > 0 %>
+                <div class="row">
+                  <div class="col-6">HST:</div>
+                  <div class="col-6 text-right"><%= number_to_currency(@order.hst) %></div>
+                </div>
+              <% end %>
+
+              <hr>
+
+              <div class="row font-weight-bold">
+                <div class="col-6">Total:</div>
+                <div class="col-6 text-right"><%= number_to_currency(@order.total_price) %></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center mt-4">
+        <%= link_to "Back to Shopping", root_path, class: "btn btn-primary" %>
+      </div>
+    </div>
+  </div>
+</div>

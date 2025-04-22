@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MapleReads</title>
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+
+  <%= stylesheet_link_tag 'application', media: 'all' %>
+  <%= stylesheet_link_tag "https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css", media: "all" %>
+  <%= javascript_include_tag "https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js", defer: true %>
+</head>
+
+<body>
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top shadow">
+      <div class="container">
+        <%= link_to "MapleReads", root_path, class: "navbar-brand fw-bold text-pink" %>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <%= link_to "Home", root_path, class: "nav-link" %>
+            </li>
+            <li class="nav-item">
+              <%= link_to "Books", books_path, class: "nav-link" %>
+            </li>
+            <li class="nav-item">
+              <%= link_to "Cart", cart_path, class: "nav-link" %>
+            </li>
+          </ul>
+
+          <ul class="navbar-nav ms-auto">
+            <% if user_signed_in? %>
+              <li class="nav-item">
+                <span class="navbar-text text-light me-2">Welcome, <%= current_user.email %></span>
+              </li>
+              <li class="nav-item">
+                <%= button_to "Log Out", destroy_user_session_path, method: :delete, class: "btn btn-outline-light btn-sm" %>
+              </li>
+            <% else %>
+              <li class="nav-item">
+                <%= link_to "Login", new_user_session_path, class: "btn btn-outline-light btn-sm" %>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container mt-5 pt-4">
+    <%= yield %>
+  </main>
+
+  <footer class="bg-dark text-light text-center py-4 mt-5">
+    <p class="mb-0">© <%= Time.now.year %> MapleReads. All rights reserved.</p>
+  </footer>
+</body>
+</html>

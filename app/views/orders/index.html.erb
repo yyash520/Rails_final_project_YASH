@@ -1,0 +1,32 @@
+<h1>Your Orders</h1>
+
+<% if @orders.empty? %>
+  <div class="alert alert-info">
+    You haven't placed any orders yet.
+  </div>
+<% else %>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Order #</th>
+        <th>Date</th>
+        <th>Status</th>
+        <th>Total</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @orders.each do |order| %>
+        <tr>
+          <td><%= order.id %></td>
+          <td><%= order.created_at.to_formatted_s(:short) %></td>
+          <td><span class="badge bg-<%= order.status == 'completed' ? 'success' : 'warning' %>">
+              <%= order.status %>
+            </span></td>
+          <td><%= number_to_currency(order.total_price) %></td>
+          <td><%= link_to 'View', order_path(order), class: 'btn btn-sm btn-primary' %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>

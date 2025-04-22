@@ -1,0 +1,31 @@
+<h1>Your Shopping Cart</h1>
+
+<% if @cart_items.empty? %>
+  <p>Your cart is empty.</p>
+<% else %>
+  <table>
+    <thead>
+      <tr>
+        <th>Book Title</th>
+        <th>Quantity</th>
+        <th>Remove</th>
+      </tr>
+    </thead>
+    <tbody>
+    <% @cart_items.each do |book| %>
+      <tr>
+        <td><%= book.title %></td>
+        <td><%= session[:cart][book.id.to_s] %></td>
+        <td>
+          <%= button_to "Remove", remove_from_cart_path(book), method: :delete %>
+        </td>
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
+
+  <div>
+    <!-- Add a checkout or other actions here -->
+    <%= link_to "Proceed to Checkout", new_order_path, class: "btn btn-success" %>
+  </div>
+<% end %>
