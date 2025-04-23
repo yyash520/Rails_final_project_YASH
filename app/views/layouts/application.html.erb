@@ -16,7 +16,7 @@
       <div class="container">
         <%= link_to "MapleReads", root_path, class: "navbar-brand fw-bold text-pink" %>
 
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <button class="navbar-toggler" type: "button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
           <span class="navbar-toggler-icon"></span>
         </button>
 
@@ -31,6 +31,11 @@
             <li class="nav-item">
               <%= link_to "Cart", cart_path, class: "nav-link" %>
             </li>
+            <% if user_signed_in? %>
+              <li class="nav-item">
+                <%= link_to "My Orders", orders_path, class: "nav-link" %>
+              </li>
+            <% end %>
           </ul>
 
           <ul class="navbar-nav ms-auto">
@@ -53,6 +58,17 @@
   </header>
 
   <main class="container mt-5 pt-4">
+    <!-- Breadcrumbs -->
+    <%= render_breadcrumbs separator: " › ", class: "breadcrumb mb-3" %>
+
+    <!-- Flash messages -->
+    <% flash.each do |type, msg| %>
+      <div class="alert alert-<%= type == 'notice' ? 'success' : 'danger' %> alert-dismissible fade show">
+        <%= msg %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    <% end %>
+
     <%= yield %>
   </main>
 

@@ -1,32 +1,57 @@
-<h1>Your Orders</h1>
+<div class="container mt-4">
+  <h1 class="mb-4">Your Order History</h1>
 
-<% if @orders.empty? %>
-  <div class="alert alert-info">
-    You haven't placed any orders yet.
-  </div>
-<% else %>
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Order #</th>
-        <th>Date</th>
-        <th>Status</th>
-        <th>Total</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @orders.each do |order| %>
-        <tr>
-          <td><%= order.id %></td>
-          <td><%= order.created_at.to_formatted_s(:short) %></td>
-          <td><span class="badge bg-<%= order.status == 'completed' ? 'success' : 'warning' %>">
-              <%= order.status %>
-            </span></td>
-          <td><%= number_to_currency(order.total_price) %></td>
-          <td><%= link_to 'View', order_path(order), class: 'btn btn-sm btn-primary' %></td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
-<% end %>
+  <% if @orders.empty? %>
+    <div class="alert alert-info">
+      You haven't placed any orders yet. <%= link_to "Browse our books", books_path %> to get started!
+    </div>
+  <% else %>
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead class="table-light">
+          <tr>
+            <th>Order #</th>
+            <th>Date</th>
+            <th>Items</th>
+            <th>Status</th>
+            <th class="text-end">Subtotal</th>
+            <th class="text-end">Taxes</th>
+            <th class="text-end">Total</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @orders.each do |order| %>
+            <tr>
+              <td><%= order.id %></td>
+              <td><%= order.created_at.strftime("%b %d, %Y") %></td>
+              <td><%= order.order_items.sum(:quantity) %></td>
+              <td>
+                <span class="badge <%= status_badge_class(order.status) %>">
+                  <%= order.status.capitalize %>
+                </span>
+              </td>
+              <td class="text-end"><%= number_to_currency(order.subtotal) %></td>
+              <td class="text-end"><%= order.tax_summary %></td>
+              <td class="text-end fw-bold"><%= number_to_currency(order.total_amount) %></td>
+              <td>
+                <%= link_to order_path(order), class: "btn btn-sm btn-outline-primary" do %>
+                  <i class="bi bi-eye-fill"></i> Details
+                <% end %>
+                <% if order.completed? %>
+                  <%= link_to order_path(order, format: :pdf), class: "btn btn-sm btn-outline-secondary" do %>
+                    <i class="bi bi-download"></i> Invoice
+                  <% end %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+
+      <div class="d-flex justify-content-center mt-4">
+        <%= paginate @orders %>
+      </div>
+    </div>
+  <% end %>
+</div>

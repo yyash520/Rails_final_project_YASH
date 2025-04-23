@@ -37,7 +37,6 @@ class Order < ApplicationRecord
   before_validation :set_default_status, if: :new_record?
   before_validation :calculate_totals_if_no_args, unless: :persisted?
 
-  # Ransack configuration
   def self.ransackable_attributes(auth_object = nil)
     %w[billing_address created_at customer_notes gst hst id province pst
        shipping_address status total_price updated_at user_id]
@@ -45,10 +44,6 @@ class Order < ApplicationRecord
 
   def self.ransackable_associations(auth_object = nil)
     %w[customer order_items books]
-  end
-
-  def subtotal
-    order_items.sum { |item| (item.price || 0) * (item.quantity || 0) }
   end
 
   def calculate_totals(cart_items = nil, books = nil)
@@ -75,6 +70,7 @@ class Order < ApplicationRecord
 
     calculate_taxes(subtotal_value)
     self.total_price = (subtotal_value + tax_total).round(2)
+    self.subtotal = subtotal_value.round(2)
   end
 
   def tax_total

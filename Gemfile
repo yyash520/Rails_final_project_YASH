@@ -53,3 +53,6 @@ gem 'activerecord'
 gem 'sassc'
 gem 'activeadmin_quill_editor'
 gem 'activeadmin-searchable_select'
+gem 'breadcrumbs_on_rails'
+gem 'gretel'
+

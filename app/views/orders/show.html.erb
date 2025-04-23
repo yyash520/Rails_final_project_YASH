@@ -1,102 +1,126 @@
 <div class="container mt-4">
   <div class="card">
-    <div class="card-header bg-success text-white">
-      <h1>Order Confirmation #<%= @order.id %></h1>
-    </div>
-    <div class="card-body">
-      <div class="alert alert-success">
-        <h4 class="alert-heading">Thank you for your order!</h4>
-        <p>Your order has been placed successfully.</p>
+    <div class="card-header bg-<%= status_badge_class(@order.status) %> text-white">
+      <div class="d-flex justify-content-between align-items-center">
+        <h1 class="mb-0">Order #<%= @order.id %></h1>
+        <span class="badge bg-light text-dark">
+          <%= @order.created_at.strftime("%B %d, %Y at %H:%M") %>
+        </span>
       </div>
+    </div>
+
+    <div class="card-body">
+      <% if @order.completed? %>
+        <div class="alert alert-success">
+          <h4 class="alert-heading">Order Completed Successfully</h4>
+          <p>Thank you for your purchase! Your order is being processed.</p>
+        </div>
+      <% elsif @order.pending? %>
+        <div class="alert alert-info">
+          <h4 class="alert-heading">Order Processing</h4>
+          <p>Your order is being processed. We'll notify you when it's completed.</p>
+        </div>
+      <% end %>
 
       <div class="row mb-4">
         <div class="col-md-6">
-          <h3>Order Details</h3>
-          <p><strong>Status:</strong>
-            <span class="badge bg-<%= @order.completed? ? 'success' : 'warning' %>">
-              <%= @order.status.capitalize %>
-            </span>
-          </p>
-          <p><strong>Date:</strong> <%= @order.created_at.strftime("%B %d, %Y %H:%M") %></p>
+          <div class="card mb-3">
+            <div class="card-header bg-light">
+              <h5 class="mb-0">Shipping Information</h5>
+            </div>
+            <div class="card-body">
+              <address>
+                <%= simple_format(@order.shipping_address) %>
+                <strong>Province:</strong> <%= @order.province %>
+              </address>
+            </div>
+          </div>
         </div>
 
         <div class="col-md-6">
-          <h3>Shipping Address</h3>
-          <p><%= simple_format(@order.shipping_address) %></p>
-
-          <h3 class="mt-4">Billing Address</h3>
-          <p><%= simple_format(@order.billing_address) %></p>
-
-          <h5 class="mt-4">Province</h5>
-          <p><%= @order.province %></p>
+          <div class="card mb-3">
+            <div class="card-header bg-light">
+              <h5 class="mb-0">Billing Information</h5>
+            </div>
+            <div class="card-body">
+              <address>
+                <%= simple_format(@order.billing_address) %>
+                <strong>Province:</strong> <%= @order.province %>
+              </address>
+            </div>
+          </div>
         </div>
       </div>
 
-      <h3>Order Items</h3>
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <th>Book</th>
-            <th>Quantity</th>
-            <th>Price</th>
-            <th>Line Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% subtotal = 0 %>
-          <% @order.order_items.each do |item| %>
-            <% line_total = item.quantity * item.price %>
-            <% subtotal += line_total %>
+      <h3 class="mb-3">Order Items</h3>
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead>
             <tr>
-              <td><%= item.book.title %></td>
-              <td><%= item.quantity %></td>
-              <td><%= number_to_currency(item.price) %></td>
-              <td><%= number_to_currency(line_total) %></td>
+              <th>Book</th>
+              <th class="text-center">Quantity</th>
+              <th class="text-end">Price</th>
+              <th class="text-end">Total</th>
             </tr>
-          <% end %>
-        </tbody>
-        <tfoot>
-          <tr>
-            <th colspan="3" class="text-end">Subtotal:</th>
-            <th><%= number_to_currency(subtotal) %></th>
-          </tr>
-
-          <%# Dynamic tax calculation based on province %>
-          <% rates = tax_rates_for(@order.province) %>
-          <% gst = subtotal * rates[:gst] %>
-          <% pst = subtotal * rates[:pst] %>
-          <% hst = subtotal * rates[:hst] %>
-          <% total = subtotal + gst + pst + hst %>
-
-          <% if gst > 0 %>
+          </thead>
+          <tbody>
+            <% @order.order_items.each do |item| %>
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <% if item.book.cover_image.attached? %>
+                      <%= image_tag item.book.cover_image.variant(resize: "50x75"), class: "me-3" %>
+                    <% end %>
+                    <div>
+                      <strong><%= item.book.title %></strong><br>
+                      <small class="text-muted">ISBN: <%= item.book.isbn %></small>
+                    </div>
+                  </div>
+                </td>
+                <td class="text-center"><%= item.quantity %></td>
+                <td class="text-end"><%= number_to_currency(item.price) %></td>
+                <td class="text-end"><%= number_to_currency(item.price * item.quantity) %></td>
+              </tr>
+            <% end %>
+          </tbody>
+          <tfoot class="table-group-divider">
             <tr>
-              <th colspan="3" class="text-end">GST (<%= (rates[:gst] * 100).to_i %>%):</th>
-              <th><%= number_to_currency(gst) %></th>
+              <th colspan="3" class="text-end">Subtotal:</th>
+              <th class="text-end"><%= number_to_currency(@order.subtotal) %></th>
             </tr>
-          <% end %>
-
-          <% if pst > 0 %>
-            <tr>
-              <th colspan="3" class="text-end">PST (<%= (rates[:pst] * 100).to_i %>%):</th>
-              <th><%= number_to_currency(pst) %></th>
+            <% if @order.gst_amount > 0 %>
+              <tr>
+                <th colspan="3" class="text-end">GST:</th>
+                <th class="text-end"><%= number_to_currency(@order.gst_amount) %></th>
+              </tr>
+            <% end %>
+            <% if @order.pst_amount > 0 %>
+              <tr>
+                <th colspan="3" class="text-end">PST:</th>
+                <th class="text-end"><%= number_to_currency(@order.pst_amount) %></th>
+              </tr>
+            <% end %>
+            <% if @order.hst_amount > 0 %>
+              <tr>
+                <th colspan="3" class="text-end">HST:</th>
+                <th class="text-end"><%= number_to_currency(@order.hst_amount) %></th>
+              </tr>
+            <% end %>
+            <tr class="table-success">
+              <th colspan="3" class="text-end">Total:</th>
+              <th class="text-end"><%= number_to_currency(@order.total_amount) %></th>
             </tr>
-          <% end %>
+          </tfoot>
+        </table>
+      </div>
 
-          <% if hst > 0 %>
-            <tr>
-              <th colspan="3" class="text-end">HST (<%= (rates[:hst] * 100).to_i %>%):</th>
-              <th><%= number_to_currency(hst) %></th>
-            </tr>
-          <% end %>
-
-          <tr class="table-success">
-            <th colspan="3" class="text-end">Total (Including Taxes):</th>
-            <th><%= number_to_currency(total) %></th>
-          </tr>
-        </tfoot>
-      </table>
-
-      <%= link_to "Back to Books", books_path, class: "btn btn-primary" %>
+      <div class="mt-4">
+        <%= link_to "Back to Orders", orders_path, class: "btn btn-outline-secondary" %>
+        <%= link_to "Continue Shopping", books_path, class: "btn btn-primary" %>
+        <% if @order.completed? %>
+          <%= link_to "Download Invoice", order_path(@order, format: :pdf), class: "btn btn-outline-primary" %>
+        <% end %>
+      </div>
     </div>
   </div>
 </div>
