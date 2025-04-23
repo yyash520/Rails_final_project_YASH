@@ -1,3 +1,5 @@
+<%= render_breadcrumbs([["Home", root_path], ["Cart", cart_path], ["Checkout", new_checkout_path], ["Confirmation", "#"]]) %>
+
 <div class="container mt-4">
   <div class="card">
     <div class="card-header bg-success text-white">
@@ -26,6 +28,7 @@
                   <%= @order.status.present? ? @order.status.capitalize : "Pending" %>
                 </span>
               </p>
+              <p><strong>Customer ID:</strong> <%= @order.user_id %></p>
             </div>
           </div>
         </div>
@@ -39,7 +42,6 @@
               <p><strong>Shipping Address:</strong><br>
                 <%= @order.shipping_address %><br>
                 <%= @order.province %></p>
-
               <p><strong>Billing Address:</strong><br>
                 <%= @order.billing_address %><br>
                 <%= @order.province %></p>
@@ -48,9 +50,10 @@
         </div>
       </div>
 
+      <!-- Order Invoice Section -->
       <div class="card mb-4">
         <div class="card-header">
-          <h5 class="mb-0">Order Items</h5>
+          <h5 class="mb-0">Order Invoice</h5>
         </div>
         <div class="card-body p-0">
           <div class="table-responsive">

@@ -1,5 +1,5 @@
 class CheckoutController < ApplicationController
-  before_action :authenticate_user!
+  before_action :authenticate_user!, only: [:create, :confirm]
   before_action :load_cart_data, only: [:new, :create]
   before_action :verify_cart_not_empty, only: [:new, :create]
   before_action :load_books_with_lock, only: [:create]
@@ -15,7 +15,8 @@ class CheckoutController < ApplicationController
   def create
     removed_books = remove_out_of_stock_items
     if removed_books.any?
-      @order = current_user.orders.new(order_params) # Ensure @order is set for the form
+      @order = current_user.orders.new(order_params) if current_user
+      @order ||= Order.new(order_params)
       flash.now[:alert] = "Sorry, the following items are out of stock and were removed from your cart: #{removed_books.join(', ')}"
       load_books
       @provinces = Order::PROVINCE_TAXES.keys
@@ -42,7 +43,8 @@ class CheckoutController < ApplicationController
         end
       end
     rescue => e
-      @order ||= current_user.orders.new(order_params) # Ensure @order is set for the form
+      @order ||= current_user.orders.new(order_params) if current_user
+      @order ||= Order.new(order_params)
       Rails.logger.error "Checkout Error: #{e.message}\n#{e.backtrace.join("\n")}"
       load_books
       @provinces = Order::PROVINCE_TAXES.keys
@@ -85,12 +87,16 @@ class CheckoutController < ApplicationController
   end
 
   def initialize_order
-    @order ||= current_user.orders.new(
-      shipping_address: current_user.address,
-      billing_address: current_user.address,
-      province: current_user.province,
-      status: :pending
-    )
+    @order ||= if current_user
+      current_user.orders.new(
+        shipping_address: current_user.address,
+        billing_address: current_user.address,
+        province: current_user.province,
+        status: :pending
+      )
+    else
+      Order.new
+    end
   end
 
   def calculate_order_totals
@@ -138,11 +144,12 @@ class CheckoutController < ApplicationController
 
   def clear_cart
     session.delete(:cart)
-    current_user.cart.line_items.destroy_all if current_user.cart.present?
+    current_user.cart.line_items.destroy_all if current_user&.cart.present?
   end
 
   def handle_checkout_failure
-    @order ||= current_user.orders.new(order_params) # Ensure @order is set for the form
+    @order ||= current_user.orders.new(order_params) if current_user
+    @order ||= Order.new(order_params)
     load_books
     @provinces = Order::PROVINCE_TAXES.keys
     flash.now[:alert] = @order.errors.full_messages.to_sentence.presence || "Order could not be placed"

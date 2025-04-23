@@ -1,9 +1,10 @@
 ActiveAdmin.register Order do
   permit_params :user_id, :shipping_address, :billing_address, :province,
                 :status, :customer_notes, :subtotal, :total_price,
-                :gst, :pst, :hst, order_items_attributes: [:id, :book_id, :quantity, :price, :_destroy]
+                :gst, :pst, :hst,
+                order_items_attributes: [:id, :book_id, :quantity, :price, :_destroy]
 
-  # Filters configuration - fixed user filter
+  # Filters configuration
   filter :user_id, as: :select,
          collection: -> { User.all.map { |u| [u.email, u.id] } },
          label: "Customer"
@@ -16,11 +17,13 @@ ActiveAdmin.register Order do
   index do
     selectable_column
     column :id
-    column :customer do |order|
-      link_to order.customer.email, admin_user_path(order.customer) if order.customer
+    column "Customer" do |order|
+      order.customer&.email || "Guest"
     end
-    column :status
-    column :total_price
+    column :status do |order|
+      status_tag order.status, class: "status-#{order.status}"
+    end
+    column("Total") { |order| number_to_currency(order.total_price) }
     column :province
     column :created_at
     actions
@@ -29,18 +32,16 @@ ActiveAdmin.register Order do
   # Show page configuration
   show do
     attributes_table do
-      row :customer do |order|
-        link_to order.customer.email, admin_user_path(order.customer) if order.customer
-      end
+      row("Customer") { |order| order.customer&.email || "Guest" }
       row :status
       row :shipping_address
       row :billing_address
       row :province
-      row :subtotal
-      row :gst
-      row :pst
-      row :hst
-      row :total_price
+      row("Subtotal") { number_to_currency(order.subtotal) }
+      row("GST") { number_to_currency(order.gst) }
+      row("PST") { number_to_currency(order.pst) }
+      row("HST") { number_to_currency(order.hst) }
+      row("Total") { number_to_currency(order.total_price) }
       row :created_at
       row :updated_at
     end
@@ -49,10 +50,8 @@ ActiveAdmin.register Order do
       table_for order.order_items do
         column :book
         column :quantity
-        column :price
-        column :total do |item|
-          number_to_currency(item.price * item.quantity)
-        end
+        column("Price Each") { |item| number_to_currency(item.price) }
+        column("Total") { |item| number_to_currency(item.price * item.quantity) }
       end
     end
   end
@@ -82,15 +81,16 @@ ActiveAdmin.register Order do
         item_f.input :price
       end
     end
+
     f.actions
   end
 
   # CSV export configuration
   csv do
     column :id
-    column("Customer") { |order| order.customer.email }
+    column("Customer") { |order| order.customer&.email || "Guest" }
     column :status
-    column :total_price
+    column("Total Price") { |order| order.total_price }
     column :province
     column :created_at
   end

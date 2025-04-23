@@ -1,13 +1,22 @@
+<%= render_breadcrumbs([["Home", root_path], ["Cart", cart_path], ["Checkout", new_checkout_path]]) %>
+
 <div class="container py-5">
   <h1 class="mb-4 text-center">Checkout</h1>
 
   <%= render 'shared/error_messages', object: (@order || Order.new) %>
 
+  <% unless user_signed_in? %>
+    <div class="alert alert-info text-center">
+      <strong>Note:</strong> Please <%= link_to "sign in", new_user_session_path %> or
+      <%= link_to "create an account", new_user_registration_path %> to place your order.
+      You can review your cart and order details below.
+    </div>
+  <% end %>
+
   <div class="row">
     <!-- Checkout Form -->
     <div class="col-lg-8 mb-4">
       <%= form_with model: @order, url: checkout_path, method: :post, data: { turbo: false }, html: { class: "needs-validation" } do |f| %>
-
         <!-- Shipping Info -->
         <div class="card shadow-sm mb-4">
           <div class="card-header bg-primary text-white">
@@ -18,7 +27,6 @@
               <%= f.label :shipping_address, class: "form-label" %>
               <%= f.text_area :shipping_address, class: 'form-control', required: true, rows: 3 %>
             </div>
-
             <div class="mb-3">
               <%= f.label :province, class: "form-label" %>
               <%= f.select :province, options_for_select(
@@ -42,7 +50,6 @@
             </div>
           </div>
         </div>
-
         <!-- Billing Info -->
         <div class="card shadow-sm mb-4">
           <div class="card-header bg-primary text-white">
@@ -55,10 +62,15 @@
             </div>
           </div>
         </div>
-
-        <div class="text-end">
-          <%= f.submit "Place Order", class: "btn btn-success btn-lg px-5" %>
-        </div>
+        <% if user_signed_in? %>
+          <div class="text-end">
+            <%= f.submit "Place Order", class: "btn btn-success btn-lg px-5" %>
+          </div>
+        <% else %>
+          <div class="text-end">
+            <%= button_tag "Place Order", class: "btn btn-success btn-lg px-5", disabled: true %>
+          </div>
+        <% end %>
       <% end %>
     </div>
 

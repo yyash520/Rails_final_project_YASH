@@ -28,7 +28,7 @@
               <td><%= order.order_items.sum(:quantity) %></td>
               <td>
                 <span class="badge <%= status_badge_class(order.status) %>">
-                  <%= order.status.capitalize %>
+                  <%= order.status.present? ? order.status.capitalize : "Pending" %>
                 </span>
               </td>
               <td class="text-end"><%= number_to_currency(order.subtotal) %></td>
